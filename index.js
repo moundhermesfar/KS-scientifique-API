@@ -18,9 +18,6 @@ app.get("/", (req, res) => {
   res.status(200).send("welcome");
 });
 
-app.use("/admin/categories", CategoryRoutes);
-app.use("/admin/products", ProductRoutes);
-
 app.get("/*", function (req, res) {
   res.sendFile(path.join(__dirname, "../frontend/index.html"), function (err) {
     if (err) {
@@ -28,6 +25,9 @@ app.get("/*", function (req, res) {
     }
   });
 });
+
+app.use("/admin/categories", CategoryRoutes);
+app.use("/admin/products", ProductRoutes);
 
 mongoose
   .connect(process.env.DBURL)
