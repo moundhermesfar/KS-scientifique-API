@@ -42,8 +42,8 @@ router.post(
         description: request.body.description,
         price: request.body.price,
         img: {
-          data: Buffer.from(request.body.img, "base64"), // Assuming the image is sent as base64 encoded string
-          contentType: "image/jpeg", // Adjust based on the image type you are receiving
+          data: Buffer.from(request.body.img, "base64"), 
+          contentType: "image/jpeg", 
         },
       };
 
@@ -107,8 +107,8 @@ router.put("/:id", async (request, response) => {
       name: request.body.name,
       description: request.body.description,
       img: {
-        data: Buffer.from(request.body.img, "base64"), // Assuming the image is sent as base64 encoded string
-        contentType: "image/jpeg", // Adjust based on the image type you are receiving
+        data: Buffer.from(request.body.img, "base64"), 
+        contentType: "image/jpeg", 
       },
     });
 
@@ -147,7 +147,7 @@ router.delete("/delete-product/:id", async (request, response) => {
 router.get("/products-by-category/:category", async (request, response) => {
   try {
     const { category } = request.params;
-    const products = await Product.find({ category }); // Assuming 'category' field in the product model
+    const products = await Product.find({ category }); 
 
     return response.status(200).json(products);
   } catch (error) {

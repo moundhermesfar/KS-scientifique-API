@@ -32,8 +32,8 @@ router.post(
       const newCategory = {
         name: request.body.name,
         img: {
-          data: Buffer.from(request.body.img, "base64"), // Assuming the image is sent as base64 encoded string
-          contentType: "image/png", // Adjust based on the image type you are receiving
+          data: Buffer.from(request.body.img, "base64"),
+          contentType: "image/png",
         },
       };
 
@@ -51,7 +51,6 @@ router.get("/get-categories", async (request, response) => {
   try {
     const categories = await Category.find({});
 
-    // Convert image data to base64
     const categoriesWithBase64 = categories.map((category) => {
       return {
         ...category._doc,
@@ -100,7 +99,6 @@ router.put(
       existingCategory.name = request.body.name;
 
       if (request.file) {
-        // Update only if a new file is provided
         existingCategory.img = {
           data: Buffer.from(request.body.img, "base64"),
           contentType: "image/png",
