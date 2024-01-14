@@ -42,8 +42,8 @@ router.post(
         description: request.body.description,
         price: request.body.price,
         img: {
-          data: Buffer.from(request.body.img, "base64"), 
-          contentType: "image/jpeg", 
+          data: Buffer.from(request.body.img, "base64"),
+          contentType: "image/jpeg",
         },
       };
 
@@ -95,22 +95,35 @@ router.get("/get-products", async (request, response) => {
 
 router.put("/:id", async (request, response) => {
   try {
-    if (!request.body.name || !request.body.description || !request.body.img) {
+    if (
+      !request.body.name ||
+      !request.body.description ||
+      !request.body.img ||
+      !request.body.price ||
+      !request.body.category
+    ) {
       return response.status(400).send({
-        message: "Send all required fields: name, description, img",
+        message:
+          "Send all required fields: name, description, img, price, category",
       });
     }
 
     const { id } = request.params;
 
-    const result = await Product.findByIdAndUpdate(id, {
-      name: request.body.name,
-      description: request.body.description,
-      img: {
-        data: Buffer.from(request.body.img, "base64"), 
-        contentType: "image/jpeg", 
+    const result = await Product.findByIdAndUpdate(
+      id,
+      {
+        name: request.body.name,
+        description: request.body.description,
+        img: {
+          data: Buffer.from(request.body.img, "base64"),
+          contentType: "image/jpeg",
+        },
+        price: request.body.price,
+        category: request.body.category,
       },
-    });
+      { new: true }
+    );
 
     if (!result) {
       return response.status(404).json({ message: "product not found" });
@@ -147,7 +160,7 @@ router.delete("/delete-product/:id", async (request, response) => {
 router.get("/products-by-category/:category", async (request, response) => {
   try {
     const { category } = request.params;
-    const products = await Product.find({ category }); 
+    const products = await Product.find({ category });
 
     return response.status(200).json(products);
   } catch (error) {
