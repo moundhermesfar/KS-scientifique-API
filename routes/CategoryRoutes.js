@@ -84,39 +84,36 @@ router.get("/get-category/:id", async (request, response) => {
   }
 });
 
-router.put(
-  "/update-category/:id",
-  upload.single("file"),
-  async (request, response) => {
-    try {
-      const { id } = request.params;
-      const existingCategory = await Category.findById(id);
+router.put("/update-category/:id", upload.single("file"), async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name } = req.body;
+    const existingCategory = await Category.findById(id);
 
-      if (!existingCategory) {
-        return response.status(404).json({ message: "Category not found" });
-      }
-
-      existingCategory.name = request.body.name;
-
-      if (request.file) {
-        existingCategory.img = {
-          data: Buffer.from(request.body.img, "base64"),
-          contentType: "image/png",
-        };
-      }
-
-      const updatedCategory = await existingCategory.save();
-
-      return response.status(200).json({
-        message: "Category updated successfully",
-        data: updatedCategory,
-      });
-    } catch (error) {
-      console.error(error.message);
-      response.status(500).send({ message: "Internal Server Error" });
+    if (!existingCategory) {
+      return res.status(404).json({ message: "Category not found" });
     }
+
+    existingCategory.name = name;
+
+    if (req.file) {
+      existingCategory.img = {
+        data: req.file.buffer,
+        contentType: req.file.mimetype,
+      };
+    }
+
+    const updatedCategory = await existingCategory.save();
+
+    return res.status(200).json({
+      message: "Category updated successfully",
+      data: updatedCategory,
+    });
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).send({ message: "Internal Server Error" });
   }
-);
+});
 
 router.delete("/delete-category:id", async (request, response) => {
   try {
