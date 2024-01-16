@@ -12,11 +12,11 @@ const PORT = process.env.PORT || 5000;
 const app = express();
 
 app.use(express.json());
-const corsOptions = {
-  origin: ["https://ks-scientifique.onrender.com", "http://localhost:5173/"],
-};
+// const corsOptions = {
+//   origin: "https://ks-scientifique.onrender.com",
+// };
 
-app.use(cors(corsOptions));
+// app.use(cors(corsOptions));
 
 app.get("/", (req, res) => {
   res.status(200).send("welcome");
