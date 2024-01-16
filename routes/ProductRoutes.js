@@ -43,7 +43,7 @@ router.post(
         price: request.body.price,
         img: {
           data: Buffer.from(request.body.img, "base64"),
-          contentType: "image/jpeg",
+          contentType: "image/png",
         },
       };
 
@@ -93,50 +93,44 @@ router.get("/get-products", async (request, response) => {
 //   }
 // });
 
-router.put("/update-product/:id", async (request, response) => {
-  try {
-    if (
-      !request.body.name ||
-      !request.body.description ||
-      !request.body.img ||
-      !request.body.price ||
-      !request.body.category
-    ) {
-      return response.status(400).send({
-        message:
-          "Send all required fields: name, description, img, price, category",
+router.put(
+  "/update-product/:id",
+  upload.single("file"),
+  async (request, response) => {
+    try {
+      const { id } = request.params;
+      const existingProduct = await Product.findById(id);
+
+      if (!existingProduct) {
+        return response.status(404).json({ message: "Product not found" });
+      }
+
+      existingProduct.name = request.body.name;
+      existingProduct.description = request.body.description;
+      existingProduct.price = request.body.price;
+      existingProduct.category = request.body.category;
+
+      if (request.file) {
+        existingProduct.img = {
+          data: Buffer.from(request.file.buffer, "base64"),
+          contentType: request.file.mimetype,
+        };
+      }
+
+      const updatedProduct = await existingProduct.save();
+
+      return response.status(200).json({
+        message: "Product updated successfully",
+        data: updatedProduct,
       });
+    } catch (error) {
+      console.error(error.message);
+      response.status(500).send({ message: "Internal Server Error" });
     }
-
-    const { id } = request.params;
-
-    const result = await Product.findByIdAndUpdate(
-      id,
-      {
-        name: request.body.name,
-        description: request.body.description,
-        img: {
-          data: Buffer.from(request.body.img, "base64"),
-          contentType: "image/jpeg",
-        },
-        price: request.body.price,
-        category: request.body.category,
-      },
-      { new: true }
-    );
-
-    if (!result) {
-      return response.status(404).json({ message: "product not found" });
-    }
-
-    return response
-      .status(200)
-      .send({ message: "product updated successfully" });
-  } catch (error) {
-    console.log(error.message);
-    response.status(500).send({ message: error.message });
   }
-});
+);
+
+module.exports = router;
 
 router.delete("/delete-product/:id", async (request, response) => {
   try {
