@@ -80,7 +80,7 @@ router.get("/get-products", async (request, response) => {
   }
 });
 
-router.get("/get-products/:id", async (request, response) => {
+router.get("/get-product/:id", async (request, response) => {
   try {
     const { id } = request.params;
 
