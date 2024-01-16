@@ -13,7 +13,7 @@ const app = express();
 
 app.use(express.json());
 const corsOptions = {
-  origin: "https://ks-scientifique.onrender.com",
+  origin: ["https://ks-scientifique.onrender.com", "http://localhost:5173/"],
 };
 
 app.use(cors(corsOptions));
