@@ -93,7 +93,7 @@ router.get("/get-products", async (request, response) => {
 //   }
 // });
 
-router.put("/:id", async (request, response) => {
+router.put("/update-product/:id", async (request, response) => {
   try {
     if (
       !request.body.name ||

@@ -84,30 +84,32 @@ router.get("/get-category/:id", async (request, response) => {
   }
 });
 
-router.put("/update-category/:id", upload.single("file"), async (req, res) => {
+router.put("/update-category/:id", async (req, res) => {
   try {
+    if (!req.body.name || !req.body.img) {
+      return res.status(400).send({
+        message: "Send all required fields: name, img",
+      });
+    }
     const { id } = req.params;
-    const { name } = req.body;
-    const existingCategory = await Category.findById(id);
+    const result = await Category.findByIdAndUpdate(
+      id,
+      {
+        name: req.body.name,
+        img: {
+          data: Buffer.from(req.body.img, "base64"),
+          contentType: "image/png",
+        },
+      },
+      { new: true }
+    );
 
-    if (!existingCategory) {
+    if (!result) {
       return res.status(404).json({ message: "Category not found" });
     }
 
-    existingCategory.name = name;
-
-    if (req.file) {
-      existingCategory.img = {
-        data: req.file.buffer,
-        contentType: req.file.mimetype,
-      };
-    }
-
-    const updatedCategory = await existingCategory.save();
-
-    return res.status(200).json({
+    return res.status(200).send({
       message: "Category updated successfully",
-      data: updatedCategory,
     });
   } catch (error) {
     console.error(error.message);
