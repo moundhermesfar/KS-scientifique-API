@@ -18,77 +18,41 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-router.post("/create-product", upload.array("files", 3), async (req, res) => {
-  try {
-    const { name, category, description, price } = req.body;
-    const images = req.files.map((file) => ({
-      data: Buffer.from(file.buffer, "base64"),
-      contentType: file.mimetype,
-    }));
-
-    if (!name || !category || !description || !price || images.length === 0) {
-      return res.status(400).send({
-        message:
-          "Send all required fields: name, category, description, price, files",
-      });
-    }
-
-    const newProduct = {
-      name,
-      category,
-      description,
-      price,
-      img1: images[0],
-      img2: images[1],
-      img3: images[2],
-    };
-
-    const product = await Product.create(newProduct);
-
-    return res.status(201).send(product);
-  } catch (error) {
-    console.error(error.message);
-    res.status(500).send({ message: error.message });
-  }
-});
-
-router.put(
-  "/update-product/:id",
-  upload.array("files", 3),
-  async (req, res) => {
+router.post(
+  "/create-product",
+  upload.single("file"),
+  async (request, response) => {
     try {
-      const { id } = req.params;
-      const existingProduct = await Product.findById(id);
-
-      if (!existingProduct) {
-        return res.status(404).json({ message: "Product not found" });
+      if (
+        !request.body.name ||
+        !request.body.category ||
+        !request.body.description ||
+        !request.body.price ||
+        !request.body.img
+      ) {
+        return response.status(400).send({
+          message:
+            "Send all required fields: name, category, description, price, img",
+        });
       }
 
-      existingProduct.name = req.body.name;
-      existingProduct.description = req.body.description;
-      existingProduct.price = req.body.price;
-      existingProduct.category = req.body.category;
+      const newProduct = {
+        name: request.body.name,
+        category: request.body.category,
+        description: request.body.description,
+        price: request.body.price,
+        img: {
+          data: Buffer.from(request.body.img, "base64"),
+          contentType: "image/png",
+        },
+      };
 
-      if (req.files) {
-        const images = req.files.map((file) => ({
-          data: Buffer.from(file.buffer, "base64"),
-          contentType: file.mimetype,
-        }));
+      const product = await Product.create(newProduct);
 
-        existingProduct.img1 = images[0] || existingProduct.img1;
-        existingProduct.img2 = images[1] || existingProduct.img2;
-        existingProduct.img3 = images[2] || existingProduct.img3;
-      }
-
-      const updatedProduct = await existingProduct.save();
-
-      return res.status(200).json({
-        message: "Product updated successfully",
-        data: updatedProduct,
-      });
+      return response.status(201).send(product);
     } catch (error) {
-      console.error(error.message);
-      res.status(500).send({ message: "Internal Server Error" });
+      console.log(error.message);
+      response.status(500).send({ message: error.message });
     }
   }
 );
@@ -128,6 +92,8 @@ router.get("/get-product/:id", async (request, response) => {
     response.status(500).send({ message: error.message });
   }
 });
+
+
 
 router.delete("/delete-product/:id", async (request, response) => {
   try {
