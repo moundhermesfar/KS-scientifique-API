@@ -93,7 +93,42 @@ router.get("/get-product/:id", async (request, response) => {
   }
 });
 
+router.put(
+  "/update-product/:id",
+  upload.single("file"),
+  async (request, response) => {
+    try {
+      const { id } = request.params;
+      const existingProduct = await Product.findById(id);
 
+      if (!existingProduct) {
+        return response.status(404).json({ message: "Product not found" });
+      }
+
+      existingProduct.name = request.body.name;
+      existingProduct.description = request.body.description;
+      existingProduct.price = request.body.price;
+      existingProduct.category = request.body.category;
+
+      if (request.file) {
+        existingProduct.img = {
+          data: Buffer.from(request.file.buffer, "base64"),
+          contentType: request.file.mimetype,
+        };
+      }
+
+      const updatedProduct = await existingProduct.save();
+
+      return response.status(200).json({
+        message: "Product updated successfully",
+        data: updatedProduct,
+      });
+    } catch (error) {
+      console.error(error.message);
+      response.status(500).send({ message: "Internal Server Error" });
+    }
+  }
+);
 
 router.delete("/delete-product/:id", async (request, response) => {
   try {
