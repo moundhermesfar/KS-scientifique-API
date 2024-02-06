@@ -28,7 +28,9 @@ router.post(
         !request.body.category ||
         !request.body.description ||
         !request.body.price ||
-        !request.body.img
+        !request.body.img1 ||
+        !request.body.img2 ||
+        !request.body.img3
       ) {
         return response.status(400).send({
           message:
@@ -41,8 +43,16 @@ router.post(
         category: request.body.category,
         description: request.body.description,
         price: request.body.price,
-        img: {
-          data: Buffer.from(request.body.img, "base64"),
+        img1: {
+          data: Buffer.from(request.body.img1, "base64"),
+          contentType: "image/png",
+        },
+        img2: {
+          data: Buffer.from(request.body.img2, "base64"),
+          contentType: "image/png",
+        },
+        img3: {
+          data: Buffer.from(request.body.img3, "base64"),
           contentType: "image/png",
         },
       };
@@ -57,6 +67,50 @@ router.post(
   }
 );
 
+router.put(
+  "/update-product/:id",
+  upload.single("file"),
+  async (request, response) => {
+    try {
+      const { id } = request.params;
+      const existingProduct = await Product.findById(id);
+
+      if (!existingProduct) {
+        return response.status(404).json({ message: "Product not found" });
+      }
+
+      existingProduct.name = request.body.name;
+      existingProduct.description = request.body.description;
+      existingProduct.price = request.body.price;
+      existingProduct.category = request.body.category;
+
+      if (request.file) {
+        existingProduct.img1 = {
+          data: Buffer.from(request.body.img1, "base64"),
+          contentType: request.file.mimetype,
+        };
+        existingProduct.img2 = {
+          data: Buffer.from(request.body.img2, "base64"),
+          contentType: request.file.mimetype,
+        };
+        existingProduct.img3 = {
+          data: Buffer.from(request.body.img3, "base64"),
+          contentType: request.file.mimetype,
+        };
+      }
+
+      const updatedProduct = await existingProduct.save();
+
+      return response.status(200).json({
+        message: "Product updated successfully",
+        data: updatedProduct,
+      });
+    } catch (error) {
+      console.error(error.message);
+      response.status(500).send({ message: "Internal Server Error" });
+    }
+  }
+);
 router.get("/get-products", async (request, response) => {
   try {
     const products = await Product.find({});
@@ -64,9 +118,17 @@ router.get("/get-products", async (request, response) => {
     const productsWithBase64 = products.map((product) => {
       return {
         ...product._doc,
-        img: {
-          ...product._doc.img,
-          data: product.img.data.toString("base64"),
+        img1: {
+          ...product._doc.img1,
+          data: product.img1.data.toString("base64"),
+        },
+        img2: {
+          ...product._doc.img2,
+          data: product.img2.data.toString("base64"),
+        },
+        img3: {
+          ...product._doc.img3,
+          data: product.img3.data.toString("base64"),
         },
       };
     });
@@ -92,43 +154,6 @@ router.get("/get-product/:id", async (request, response) => {
     response.status(500).send({ message: error.message });
   }
 });
-
-router.put(
-  "/update-product/:id",
-  upload.single("file"),
-  async (request, response) => {
-    try {
-      const { id } = request.params;
-      const existingProduct = await Product.findById(id);
-
-      if (!existingProduct) {
-        return response.status(404).json({ message: "Product not found" });
-      }
-
-      existingProduct.name = request.body.name;
-      existingProduct.description = request.body.description;
-      existingProduct.price = request.body.price;
-      existingProduct.category = request.body.category;
-
-      if (request.file) {
-        existingProduct.img = {
-          data: Buffer.from(request.file.buffer, "base64"),
-          contentType: request.file.mimetype,
-        };
-      }
-
-      const updatedProduct = await existingProduct.save();
-
-      return response.status(200).json({
-        message: "Product updated successfully",
-        data: updatedProduct,
-      });
-    } catch (error) {
-      console.error(error.message);
-      response.status(500).send({ message: "Internal Server Error" });
-    }
-  }
-);
 
 router.delete("/delete-product/:id", async (request, response) => {
   try {

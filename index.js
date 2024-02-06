@@ -23,14 +23,6 @@ app.get("/", (req, res) => {
   res.status(200).send("welcome");
 });
 
-// app.get("/*", function (req, res) {
-//   res.sendFile(path.join(__dirname, "../frontend/index.html"), function (err) {
-//     if (err) {
-//       res.status(500).send(err);
-//     }
-//   });
-// });
-
 app.use("/admin/categories", CategoryRoutes);
 app.use("/admin/products", ProductRoutes);
 

@@ -18,7 +18,15 @@ const productSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-    img: {
+    img1: {
+      data: Buffer,
+      contentType: String,
+    },
+    img2: {
+      data: Buffer,
+      contentType: String,
+    },
+    img3: {
       data: Buffer,
       contentType: String,
     },
