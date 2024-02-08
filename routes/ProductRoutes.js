@@ -84,20 +84,23 @@ router.put(
       existingProduct.price = request.body.price;
       existingProduct.category = request.body.category;
 
-      if (request.file) {
+      if (request.body.img1)
         existingProduct.img1 = {
           data: Buffer.from(request.body.img1, "base64"),
-          contentType: request.file.mimetype,
+          contentType: "image/png",
         };
+
+      if (request.body.img2)
         existingProduct.img2 = {
           data: Buffer.from(request.body.img2, "base64"),
-          contentType: request.file.mimetype,
+          contentType: "image/png",
         };
+
+      if (request.body.img3)
         existingProduct.img3 = {
           data: Buffer.from(request.body.img3, "base64"),
-          contentType: request.file.mimetype,
+          contentType: "image/png",
         };
-      }
 
       const updatedProduct = await existingProduct.save();
 
@@ -111,6 +114,7 @@ router.put(
     }
   }
 );
+
 router.get("/get-products", async (request, response) => {
   try {
     const products = await Product.find({});

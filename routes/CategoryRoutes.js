@@ -47,6 +47,41 @@ router.post(
   }
 );
 
+router.put(
+  "/update-category/:id",
+  upload.single("file"),
+  async (request, response) => {
+    try {
+      const { id } = request.params;
+      const existingCategory = await Category.findById(id);
+
+      if (!existingCategory) {
+        return response.status(404).json({ message: "Category not found" });
+      }
+
+      existingCategory.name = request.body.name;
+
+      if (request.file) {
+        delete existingCategory.img;
+        existingCategory.img = {
+          data: Buffer.from(request.body.img, "base64"),
+          contentType: "image/png",
+        };
+      }
+
+      const updatedCategory = await existingCategory.save();
+
+      return response.status(200).json({
+        message: "Category updated successfully",
+        data: updatedCategory,
+      });
+    } catch (error) {
+      console.error(error.message);
+      response.status(500).send({ message: "Internal Server Error" });
+    }
+  }
+);
+
 router.get("/get-categories", async (request, response) => {
   try {
     const categories = await Category.find({});
@@ -83,40 +118,6 @@ router.get("/get-category/:id", async (request, response) => {
     response.status(500).send({ message: error.message });
   }
 });
-
-router.put(
-  "/update-category/:id",
-  upload.single("file"),
-  async (request, response) => {
-    try {
-      const { id } = request.params;
-      const existingCategory = await Category.findById(id);
-
-      if (!existingCategory) {
-        return response.status(404).json({ message: "Category not found" });
-      }
-
-      existingCategory.name = request.body.name;
-
-      if (request.file) {
-        existingCategory.img = {
-          data: Buffer.from(request.body.img, "base64"),
-          contentType: "image/png",
-        };
-      }
-
-      const updatedCategory = await existingCategory.save();
-
-      return response.status(200).json({
-        message: "Category updated successfully",
-        data: updatedCategory,
-      });
-    } catch (error) {
-      console.error(error.message);
-      response.status(500).send({ message: "Internal Server Error" });
-    }
-  }
-);
 
 router.delete("/delete-category:id", async (request, response) => {
   try {
